@@ -1,3 +1,6 @@
+# Updated DD2 Chain Converter
+Support for DD2 .55 chain files and batch converting them under RE Chain -> Batch Convert Chain
+
 # End Of Support Notice
 
 I am ending development of my RE Engine addons. No further updates or support will be provided.
