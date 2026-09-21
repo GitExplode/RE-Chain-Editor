@@ -4,7 +4,7 @@ from .gen_functions import textColors,raiseWarning,raiseError,getPaddingAmount,r
 
 version = 48
 
-supportedVersionSet = set([54,53,48,52,39,46,24,44,21])
+supportedVersionSet = set([55,54,53,48,52,39,46,24,44,21])
 
 #---CHAIN STRUCTS---#
 class SIZE_DATA():
@@ -337,7 +337,7 @@ class ChainSettingsData():
 			write_ushort(file, self.padding)
 		if version >= 52:
 			write_float(file, self.motionForce)#VERSION 52
-			write_uint(file, self.padding2)#VERSION 52
+			write_float(file, self.padding2)#VERSION 52
 		write_float(file, self.reduceSelfDistanceRate)
 		write_float(file, self.secondReduceDistanceRate)
 		write_float(file, self.secondReduceDistanceSpeed)

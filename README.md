@@ -24,6 +24,7 @@ Also supports collision shape (.clsp) files.
  - Allows for importing and exporting of RE Engine chain (and chain2) files.
  - Can create new chain files entirely within Blender.
  - Presets of chain configurations can be saved and shared.
+ - Batch converts `.chain.54` files to `.chain.55` (File > Import > RE Chain Editor > Batch Convert Chain Version). Only the version number is changed, files are checked with the chain reader before and after and the originals are kept.
 
 
 

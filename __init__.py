@@ -29,6 +29,7 @@ from .modules.ui_re_chain_panels import OBJECT_PT_ChainObjectModePanel,OBJECT_PT
 from .modules.re_chain_operators import WM_OT_ChainFromBone,WM_OT_CollisionFromBones,WM_OT_AlignChainsToBones,WM_OT_AlignFrames,WM_OT_PointFrame,WM_OT_CopyChainProperties,WM_OT_PasteChainProperties,WM_OT_NewChainHeader,WM_OT_ApplyChainSettingsPreset,WM_OT_NewChainSettings,WM_OT_NewWindSettings,WM_OT_NewChainJiggle,WM_OT_ApplyChainGroupPreset,WM_OT_ApplyChainNodePreset,WM_OT_ApplyWindSettingsPreset,WM_OT_SavePreset,WM_OT_OpenPresetFolder,WM_OT_NewChainLink,WM_OT_CreateChainBoneGroup,WM_OT_SwitchToPoseMode,WM_OT_SwitchToObjectMode,WM_OT_HideNonNodes,WM_OT_HideNonAngleLimits,WM_OT_HideNonCollisions,WM_OT_UnhideAll,WM_OT_RenameBoneChain,WM_OT_ApplyAngleLimitRamp,WM_OT_AlignBoneTailsToAxis,WM_OT_SetAttrFlags,WM_OT_SetNodeAttrFlags,WM_OT_SetSettingAttrFlags,WM_OT_SetJiggleAttrFlags,WM_OT_CreateChainLinkCollision,WM_OT_CreateChainSubGroup,WM_OT_SetCFILPath
 
 from .modules.blender_re_clsp import importCLSPFile,exportCLSPFile
+from .modules.re_chain_batch_operators import WM_OT_BatchConvertChainVersion
 
 class REChainPreferences(AddonPreferences):
 	bl_idname = __name__
@@ -630,6 +631,7 @@ classes = [
 	WM_OT_SetSettingAttrFlags,
 	WM_OT_SetJiggleAttrFlags,
 	WM_OT_SetCFILPath,
+	WM_OT_BatchConvertChainVersion,
 	]
 
 """
@@ -704,6 +706,8 @@ class IMPORT_MT_re_chain_editor(bpy.types.Menu):
 		layout.operator(ImportREChain.bl_idname, text="RE Chain (.chain.x) (Physics)",icon = "LINK_BLEND")
 		layout.operator(ImportREChain2.bl_idname, text="RE Chain2 (.chain2.x) (Physics) (New)",icon = "LINK_BLEND")
 		layout.operator(ImportRECLSP.bl_idname, text="RE CLSP (.clsp.x) (Collisions)",icon = "SPHERE")
+		layout.separator()
+		layout.operator(WM_OT_BatchConvertChainVersion.bl_idname, text="Batch Convert Chain Version (.chain.54 to .chain.55)",icon = "FILE_REFRESH")
 
 def re_chain_editor_import(self, context):
 	self.layout.menu("IMPORT_MT_re_chain_editor",icon = "LINK_BLEND")
