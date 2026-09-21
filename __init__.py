@@ -706,8 +706,6 @@ class IMPORT_MT_re_chain_editor(bpy.types.Menu):
 		layout.operator(ImportREChain.bl_idname, text="RE Chain (.chain.x) (Physics)",icon = "LINK_BLEND")
 		layout.operator(ImportREChain2.bl_idname, text="RE Chain2 (.chain2.x) (Physics) (New)",icon = "LINK_BLEND")
 		layout.operator(ImportRECLSP.bl_idname, text="RE CLSP (.clsp.x) (Collisions)",icon = "SPHERE")
-		layout.separator()
-		layout.operator(WM_OT_BatchConvertChainVersion.bl_idname, text="Batch Convert Chain Version (.chain.54 to .chain.55)",icon = "FILE_REFRESH")
 
 def re_chain_editor_import(self, context):
 	self.layout.menu("IMPORT_MT_re_chain_editor",icon = "LINK_BLEND")

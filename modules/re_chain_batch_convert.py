@@ -3,6 +3,8 @@
 #Converts .chain.54 files to .chain.55 by changing ONLY the version number in the header of the original file.
 #Every file is parsed with this addon's own chain reader before and after the change, so anything the
 #reader can't understand is skipped and reported instead of being written.
+#A .chain.55 file is always written (overwriting one that's already there). The original .chain.54 file is
+#then either renamed to .chain.54.bak to keep it as a backup, or removed, controlled by the keepBackup option.
 #
 #Why only the version number: the chain layout is the same in versions 54 and 55 (this addon already uses the same
 #structure sizes for both, see SIZE_DATA "ver >= 53" in file_re_chain.py), and a real .chain.54 / .chain.55 pair
@@ -73,12 +75,13 @@ def _checkChainBytes(data,expectedVersion):
 	return None
 
 
-def convertChainFile(srcPath,dstPath,srcVersion = 54,dstVersion = 55,overwrite = False):
-	"""Returns (status,message). Status is "converted", "exists" or "failed"."""
+def convertChainFile(srcPath,dstPath,srcVersion = 54,dstVersion = 55,keepBackup = True):
+	"""Returns (status,message). Status is "converted" or "failed".
+	The .chain.<dstVersion> file is always written, overwriting one that's already there.
+	When keepBackup is True the .chain.<srcVersion> file is renamed to .chain.<srcVersion>.bak (overwriting an existing .bak file), so it's kept as a backup of the original.
+	When keepBackup is False the .chain.<srcVersion> file is removed once the new file has been written, so the file is just updated in place."""
 	if SUPPORTED_CONVERSIONS.get(srcVersion) != dstVersion:
 		return ("failed",f"converting {srcVersion} to {dstVersion} is not supported")
-	if os.path.exists(dstPath) and not overwrite:
-		return ("exists","output file already exists")
 	try:
 		with open(srcPath,"rb") as file:
 			data = file.read()
@@ -109,6 +112,18 @@ def convertChainFile(srcPath,dstPath,srcVersion = 54,dstVersion = 55,overwrite =
 		except Exception:
 			pass
 		return ("failed",f"couldn't write file: {err}")
+	
+	if keepBackup:
+		backupPath = srcPath + ".bak"
+		try:
+			os.replace(srcPath,backupPath)#Renames, overwriting an existing .bak file
+		except Exception as err:
+			return ("converted",f"converted, but couldn't rename the old .chain.{srcVersion} file to .bak: {err}")
+	else:
+		try:
+			os.remove(srcPath)
+		except Exception as err:
+			return ("converted",f"converted, but couldn't remove the old .chain.{srcVersion} file: {err}")
 	return ("converted","")
 
 
@@ -128,21 +143,20 @@ def findChainFiles(directory,version,searchSubdirectories = True):
 	return sorted(foundList)
 
 
-def batchConvertChainFiles(directory,searchSubdirectories = True,overwrite = False,srcVersion = 54,dstVersion = 55):
-	"""Converts every .chain.<srcVersion> file in the directory. Original files are never modified or deleted.
-	Returns a dict with lists of (path,message) for "converted", "exists" and "failed"."""
-	results = {"converted":[],"exists":[],"failed":[]}
+def batchConvertChainFiles(directory,searchSubdirectories = True,keepBackup = True,srcVersion = 54,dstVersion = 55):
+	"""Converts every .chain.<srcVersion> file in the directory, overwriting a .chain.<dstVersion> file that's already there.
+	When keepBackup is True the .chain.<srcVersion> files are renamed to .chain.<srcVersion>.bak as backups. When False they're removed after a successful conversion.
+	Returns a dict with lists of (path,message) for "converted" and "failed"."""
+	results = {"converted":[],"failed":[]}
 	fileList = findChainFiles(directory,srcVersion,searchSubdirectories)
 	print(f"{textColors.OKCYAN}Converting {len(fileList)} .chain.{srcVersion} files to .chain.{dstVersion}...{textColors.ENDC}")
 	for srcPath in fileList:
 		dstPath = srcPath[:-len(str(srcVersion))] + str(dstVersion)#Keeps the original casing of the rest of the name
-		status,message = convertChainFile(srcPath,dstPath,srcVersion,dstVersion,overwrite)
+		status,message = convertChainFile(srcPath,dstPath,srcVersion,dstVersion,keepBackup)
 		results[status].append((srcPath,message))
 		if status == "converted":
 			print(f"{textColors.OKGREEN}Converted{textColors.ENDC} {srcPath}")
-		elif status == "exists":
-			print(f"{textColors.WARNING}Skipped (output exists){textColors.ENDC} {srcPath}")
 		else:
 			print(f"{textColors.FAIL}Failed{textColors.ENDC} {srcPath}: {message}")
-	print(f"Done. {len(results['converted'])} converted, {len(results['exists'])} skipped because the output already exists, {len(results['failed'])} failed.")
+	print(f"Done. {len(results['converted'])} converted, {len(results['failed'])} failed.")
 	return results

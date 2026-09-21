@@ -49,6 +49,9 @@ class OBJECT_PT_ChainObjectModePanel(Panel):
 		layout.operator("re_chain.apply_angle_limit_ramp")
 		layout.label(text="Create new chains in Pose Mode.")
 		layout.operator("re_chain.switch_to_pose")
+		layout.separator()
+		layout.label(text="Converts .chain.54 files in a folder to .chain.55.")
+		layout.operator("re_chain.batch_convert_version",icon = "FILE_REFRESH")
 		#Not implemented yet
 		#layout.operator("re_chain.point_frame")#Not implemented yet
 

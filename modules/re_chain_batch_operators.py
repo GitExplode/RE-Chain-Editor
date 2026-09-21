@@ -11,7 +11,7 @@ from .re_chain_batch_convert import batchConvertChainFiles
 class WM_OT_BatchConvertChainVersion(Operator):
 	bl_label = "Batch Convert Chain Version (54 to 55)"
 	bl_idname = "re_chain.batch_convert_version"
-	bl_description = "Converts all .chain.54 files in the chosen folder to .chain.55.\nOnly the version number is changed. Each file is checked with the chain reader before and after, and the original files are kept"
+	bl_description = "Converts all .chain.54 files in the chosen folder to .chain.55.\nOnly the version number is changed. Each file is checked with the chain reader before and after"
 	bl_options = {'REGISTER'}
 	
 	dirPath : bpy.props.StringProperty(
@@ -26,10 +26,10 @@ class WM_OT_BatchConvertChainVersion(Operator):
 		default = True,
 		)
 	
-	overwriteExisting : bpy.props.BoolProperty(
-		name = "Overwrite Existing .chain.55 Files",
-		description = "If a .chain.55 file already exists next to a .chain.54 file, replace it. When off, those files are skipped",
-		default = False,
+	createBackups : bpy.props.BoolProperty(
+		name = "Create Chain 54 Backups",
+		description = "Rename the original .chain.54 file to .chain.54.bak to keep it as a backup after conversion. If unchecked, the chain files are just updated in place and the .chain.54 file is not kept",
+		default = True,
 		)
 	
 	def execute(self,context):
@@ -38,11 +38,10 @@ class WM_OT_BatchConvertChainVersion(Operator):
 			showMessageBox("Choose a valid directory.",title = "Chain Version Converter",icon = "ERROR")
 			return {'CANCELLED'}
 		
-		results = batchConvertChainFiles(directory,searchSubdirectories = self.searchSubdirectories,overwrite = self.overwriteExisting,srcVersion = 54,dstVersion = 55)
+		results = batchConvertChainFiles(directory,searchSubdirectories = self.searchSubdirectories,keepBackup = self.createBackups,srcVersion = 54,dstVersion = 55)
 		convertedCount = len(results["converted"])
-		existsCount = len(results["exists"])
 		failedCount = len(results["failed"])
-		totalCount = convertedCount + existsCount + failedCount
+		totalCount = convertedCount + failedCount
 		
 		if totalCount == 0:
 			message = "No .chain.54 files found."
@@ -51,8 +50,7 @@ class WM_OT_BatchConvertChainVersion(Operator):
 			return {'FINISHED'}
 		
 		message = f"Converted {convertedCount} of {totalCount} chain files."
-		if existsCount:
-			message += f" {existsCount} skipped (.chain.55 already exists)."
+		message += " .chain.54 files renamed to .bak." if self.createBackups else " .chain.54 files not kept."
 		if failedCount:
 			message += f" {failedCount} failed, see Window > Toggle System Console."
 		showMessageBox(message,title = "Chain Version Converter",icon = "ERROR" if failedCount else "INFO")
@@ -73,7 +71,7 @@ class WM_OT_BatchConvertChainVersion(Operator):
 	def draw(self,context):
 		layout = self.layout
 		layout.label(text = "Converts .chain.54 files to .chain.55.")
-		layout.label(text = "Only the version number changes. Original files are kept.")
+		layout.label(text = "Only the version number changes.")
 		layout.prop(self,"dirPath")
 		layout.prop(self,"searchSubdirectories")
-		layout.prop(self,"overwriteExisting")
+		layout.prop(self,"createBackups")
